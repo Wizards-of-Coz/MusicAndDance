@@ -7,7 +7,7 @@ import threading
 import math
 
 
-RECORD_SECONDS = 10
+RECORD_SECONDS = 60
 DANCE_DURATION_MIN = 0.1
 DANCE_DURATION_MAX = 0.3
 HEAD_SPEED = 3
@@ -99,7 +99,7 @@ class WocDance:
             #TODO: variable time
             if detected:
                 duration = self.computeDuration(strength)
-
+                print(strength)
                 print(duration)
                 if duration > self.CHECK_TIME:
                     continue
@@ -150,8 +150,13 @@ class WocDance:
         # direction, duration
         # duration follows:
         # dr = a * log2(c * strength)
-        a = 0.02038
-        c = 30
-        duration = a * math.log2(30 * strength)
+##        a = 0.02038
+##        c = 30
+##        duration = a * math.log2(30 * strength)
+
+        # dr = a * strength + b
+        a = 0.00333
+        b = 0.097
+        duration = a * strength + b
         duration = max(DANCE_DURATION_MIN, min(duration, DANCE_DURATION_MAX))
         return duration

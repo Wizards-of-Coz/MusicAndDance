@@ -90,12 +90,16 @@ class EnergyBeatDetection(BeatDetection):
         return (detected, strength)
 
     def startStream(self):
-        self.stream = self.p.open(format=FORMAT,
-                             channels=CHANNELS,
-                             rate=RATE,
-                             input=True,
-                             frames_per_buffer=CHUNK,
-                             stream_callback=self._collectData)
+        try:
+            self.stream = self.p.open(format=FORMAT,
+                                 channels=CHANNELS,
+                                 rate=RATE,
+                                 input=True,
+                                 frames_per_buffer=CHUNK,
+                                 stream_callback=self._collectData)
+        except IOError as e:
+            print(e)
+            self.stream.close()
         self.stream.start_stream()
 
     def stopStream(self):
