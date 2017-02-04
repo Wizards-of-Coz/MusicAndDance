@@ -3,8 +3,8 @@
 
 from .BeatDetection import BeatDetection
 import pyaudio
-import struct
 import threading
+
 
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
@@ -13,7 +13,6 @@ CHANNELS = 2
 RATE = 44100
 WINDOW_SIZE = 16
 INT16_MAX_F = 32768.0
-ABSOLUTE_THRESHOLD = 1e-3
 
 # energy threshold test
 # E > C(E) * avg(E)
@@ -23,6 +22,9 @@ Ca = -0.0000015
 Cb = 1.5142857
 
 class EnergyBeatDetection(BeatDetection):
+    ABSOLUTE_THRESHOLD = 5e-1
+    # ABSOLUTE_THRESHOLD = 1e-1
+    
     beatDetected = False
     # circular buffer to store energy of current window
     energyWindow = []
@@ -30,6 +32,7 @@ class EnergyBeatDetection(BeatDetection):
     size = 0
     avg = 0.0
     lock = threading.Lock()
+    windowTime = float(CHUNK * WINDOW_SIZE) / float(RATE)
     
     def __init__(self):
         self.p = pyaudio.PyAudio()
@@ -67,7 +70,7 @@ class EnergyBeatDetection(BeatDetection):
     def checkBeat(self):
         # compute variance and compare
         if self.size < WINDOW_SIZE:
-            return False
+            return (False, 0.0)
         var = 0.0
         detected = False
         self.lock.acquire()
@@ -76,13 +79,15 @@ class EnergyBeatDetection(BeatDetection):
             var += diff * diff / float(WINDOW_SIZE)
         C = Ca * var + Cb
         threshold = C * self.avg
+        strength = 0.0
         for i in range(0, WINDOW_SIZE):
             candidate = self.energyWindow[i]
-            if candidate > threshold and candidate > ABSOLUTE_THRESHOLD:
+            if candidate > threshold and candidate > self.ABSOLUTE_THRESHOLD:
                 detected = True
+                strength = candidate
                 break
         self.lock.release()
-        return detected
+        return (detected, strength)
 
     def startStream(self):
         self.stream = self.p.open(format=FORMAT,

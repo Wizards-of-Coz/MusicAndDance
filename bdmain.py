@@ -1,25 +1,20 @@
-import pyaudio
 import wave
 import time
 from beatdetection.EnergyBeatDetection import EnergyBeatDetection
 
-
+RECORD_SECONDS = 3
+NUM_CHECKS = 20
 
 b = EnergyBeatDetection()
-
-CHUNK = 1024
-FORMAT = pyaudio.paInt16
-CHANNELS = 2
-RATE = 44100
-RECORD_SECONDS = 1
-WAVE_OUTPUT_FILENAME = "output.wav"
-
 b.startStream()
 
-for i in range(0, 20):
-    detected = b.checkBeat()
+CHECK_TIME = b.windowTime
+
+for i in range(0, int(RECORD_SECONDS / CHECK_TIME)):
+    detected, strength = b.checkBeat()
     if detected:
         print("Beat detected!")
-    time.sleep(0.1)
+        print(strength)
+    time.sleep(CHECK_TIME)
 
 b.stopStream()
