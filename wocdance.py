@@ -12,7 +12,7 @@ DANCE_DURATION_MIN = 0.1
 DANCE_DURATION_MAX = 0.3
 HEAD_SPEED = 3
 LIFT_SPEED = 3
-WHEEL_SPEED = 50
+WHEEL_SPEED = 400
 
 class WocDance:
     
@@ -80,9 +80,9 @@ class WocDance:
     
     async def danceLoop(self, robot: cozmo.robot.Robot):
         HEAD_MOVE_THRS = self.b.ABSOLUTE_THRESHOLD
-        LIFT_MOVE_THRS = 5 * HEAD_MOVE_THRS
-        WHEEL_MOVE_THRS = 10 * HEAD_MOVE_THRS
-        FLIP_THRS = 30 * HEAD_MOVE_THRS
+        LIFT_MOVE_THRS = 2 * HEAD_MOVE_THRS
+        WHEEL_MOVE_THRS = 5 * HEAD_MOVE_THRS
+        FLIP_THRS = 10 * HEAD_MOVE_THRS
         headDirection = 1
         liftDirection = 1
         wheelDirection = 1
@@ -93,7 +93,6 @@ class WocDance:
 
         detected = False
         strength = 0.0
-        direction = 1
         
         while (not danceFin):
             #TODO: variable time
@@ -125,9 +124,9 @@ class WocDance:
                 if strength > LIFT_MOVE_THRS:
                     robot.move_lift(liftDirection * HEAD_SPEED)
                     
-##                if strength > WHEEL_MOVE_THRS:
-##                    robot.drive_wheels(direction * WHEEL_SPEED,
-##                                       -direction * WHEEL_SPEED)
+                if strength > WHEEL_MOVE_THRS:
+                    await robot.drive_wheels(wheelDirection * WHEEL_SPEED,
+                                       -wheelDirection * WHEEL_SPEED)
 
                 await asyncio.sleep(duration)
 
